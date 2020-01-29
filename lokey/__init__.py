@@ -4,6 +4,8 @@ import ssl as stdlib_ssl
 import json
 
 import click
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 import requests
 import paramiko
 import eris
@@ -189,7 +191,7 @@ def keybase(ctx, query):
     url = "https://keybase.io/_/api/1.0/user/lookup.json?{key}={value}".format(
         key=key,
         value=value)
-    r = requests.get(url)
+    r = requests.get(url, verify=False)
     resp = r.json()
     print resp['them'][0]['public_keys']['primary']['bundle']
 
@@ -231,7 +233,7 @@ def ssh(ctx, domain_name):
 @fetch.command()
 @click.pass_context
 @click.argument('domain_name')
-@click.option('--kid', '--key-id', type=int, help="Key ID ('kid') to print.")
+@click.option('--key-id', type=int, help="Key ID ('kid') to print.")
 def jwk(ctx, domain_name, key_id):
     """Fetch a OIDC JWK key for a domain.
 
@@ -241,12 +243,12 @@ def jwk(ctx, domain_name, key_id):
     """
     url = 'https://{domain_name}/.well-known/openid-configuration'.format(
         domain_name=domain_name)
-    r = requests.get(url)
+    r = requests.get(url, verify=False)
     resp = r.json()
     if 'jwks_uri' not in resp:
         print("Error fetching {url}".format(url=url))
     url = resp['jwks_uri']
-    r = requests.get(url)
+    r = requests.get(url, verify=False)
     resp = r.json()
     keys = resp['keys']
 
@@ -283,7 +285,7 @@ def github(ctx, github_username, key_id):
     """
     url = 'https://api.github.com/users/{github_username}/keys'.format(
         github_username=github_username)
-    r = requests.get(url)
+    r = requests.get(url, verify=False)
     keys = r.json()
     if not len(keys) > 0:
         msg = "No keys found for user '{}'".format(github_username)
