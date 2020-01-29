@@ -1,3 +1,6 @@
+# python 3 compatibility
+from __future__ import print_function
+
 import json
 import inspect
 
@@ -42,7 +45,7 @@ class CanTransmute(object):
             transmuter = self
             transmuter.__class__ = transmuters[obj]
             return transmuter.serialize(*args, **kwargs)
-        print "Did not find: " + obj
+        print("Did not find: " + obj)
 
     def handles(self, sample):
         return False

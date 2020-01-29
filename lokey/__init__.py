@@ -1,4 +1,8 @@
 #!/usr/bin/env python
+
+# python 3 compatibility
+from __future__ import print_function
+
 import sys
 import ssl as stdlib_ssl
 import json
@@ -10,6 +14,7 @@ import requests
 import paramiko
 import eris
 from eris import ErisPublic
+import urllib2
 from hkp import KeyServer
 
 
@@ -48,7 +53,7 @@ def cli(ctx, password):
     except Exception as e:
         raise click.ClickException(str(e))
     if not subcommand:
-        print ctx.obj.key
+        print(ctx.obj.key)
 
 
 @cli.group()
@@ -80,7 +85,7 @@ def to(ctx):
 #               help='Should key be used for encrypting data?')
 def jwk(ctx):
     """JWK format."""
-    print(ctx.obj.key.to('jwk'))
+    print(ctx.obj.key.to('jwk').decode())
 
 
 @to.command()
@@ -118,15 +123,14 @@ def csr(ctx, country, state, city, company, common_name):
               help='Comment to use in the SSH key.')
 def ssh(ctx, comment):
     """OpenSSH key format."""
-    print(ctx.obj.key.to('ssh', comment=comment))
+    print(ctx.obj.key.to('ssh', comment=comment).decode())
 
 
 @to.command()
 @click.pass_context
 def pem(ctx):
     """PEM encoded key format."""
-    print(ctx.obj.key.to('pem'))
-
+    print(ctx.obj.key.to('pem').decode())
 
 @to.command()
 @click.pass_context
@@ -141,7 +145,7 @@ def pem(ctx):
               help='Email address to use for PGP key.')
 def pgp(ctx, name, comment, email):
     """PGP key format."""
-    print(ctx.obj.key.to('pgp', name=name, comment=comment, email=email))
+    print(ctx.obj.key.to('pgp', name=name, comment=comment, email=email).decode())
 
 
 @cli.group()
@@ -193,7 +197,7 @@ def keybase(ctx, query):
         value=value)
     r = requests.get(url, verify=False)
     resp = r.json()
-    print resp['them'][0]['public_keys']['primary']['bundle']
+    print(resp['them'][0]['public_keys']['primary']['bundle'])
 
 
 @fetch.command()
@@ -221,7 +225,7 @@ def ssh(ctx, domain_name):
         client.connect(domain_name, username='lokey', timeout=5)
         key = fetch_key_policy.key.public_numbers
         key = ErisPublic(e=key.e, n=key.n)
-        print key.to('ssh')
+        print(key.to('ssh').decode())
     except Exception as e:
         msg = ('Got "{message}" when attempting '
                'to connect to {domain_name}').format(
@@ -269,7 +273,7 @@ def jwk(ctx, domain_name, key_id):
     for key in keys:
         if key['kid'] != key_id_to_print:
             continue
-        print json.dumps(key)
+        print(json.dumps(key))
 
 
 @fetch.command()
@@ -308,7 +312,7 @@ def github(ctx, github_username, key_id):
     for key in keys:
         if key['id'] != key_id_to_print:
             continue
-        print key['key']
+        print(key['key'])
 
 
 @fetch.command()
@@ -396,7 +400,7 @@ def pgp(ctx, search_string, key_id, all, server):
         for key in keys:
             if key.keyid != key_id_to_print:
                 continue
-            print key.key
+            print(key.key)
         if not all:
             return
 
